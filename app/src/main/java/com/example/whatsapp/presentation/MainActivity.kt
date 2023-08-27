@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
             binding.userAuthenticationLayout.visibility = View.VISIBLE
             binding.appLogo.visibility = View.VISIBLE
             binding.userNumberLayout.visibility = View.VISIBLE
-            bindin  g.textInputLayout1.visibility = View.VISIBLE
+            binding.textInputLayout1.visibility = View.VISIBLE
             binding.etNumber.visibility = View.VISIBLE
             binding.btProceed.visibility = View.VISIBLE
 
