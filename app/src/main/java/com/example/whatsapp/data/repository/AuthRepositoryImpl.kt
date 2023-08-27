@@ -10,9 +10,11 @@ import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -27,10 +29,10 @@ class AuthRepositoryImpl @Inject constructor(
     override fun phoneNumberSignIn(
         phoneNumber: String,
         activity: MainActivity
-    ): Flow<Resource<Boolean>> = flow{
+    ): Flow<Resource<Boolean>> = channelFlow {
         try {
             // indicate process has started
-            emit(Resource.Loading)
+            trySend(Resource.Loading).isSuccess
 
             val options = PhoneAuthOptions.newBuilder(firebaseAuth)
                 .setPhoneNumber(phoneNumber)
@@ -44,18 +46,36 @@ class AuthRepositoryImpl @Inject constructor(
 
                     override fun onVerificationFailed(p0: FirebaseException) {
                         coroutineScope.launch {
-                            emit(Resource.Error(p0.localizedMessage?:"An Error Occurred in onVerificationFailed"))
+                            trySend(
+                                Resource.Error(p0.localizedMessage?:"An Error Occurred in onVerificationFailed")
+                            ).isSuccess
                         }
                     }
 
                     override fun onCodeSent(verificationId: String, p1: PhoneAuthProvider.ForceResendingToken) {
                         super.onCodeSent(verificationId, p1)
                         coroutineScope.launch {
-                            activity.showBottomSheet(verificationId)
+                            withContext(Dispatchers.Main) {
+                                activity.showBottomSheet()
+                            }
+                            activity.otpValue.collect {
+                                if (it.isNotBlank()) {
+                                    trySend(
+                                        (signInWithAuthCredential(
+                                            PhoneAuthProvider.getCredential(
+                                                verificationId,
+                                                it
+                                            )
+                                        ))
+                                    ).isSuccess
+                                }
+                            }
                         }
                     }
 
-                })
+                }).build()
+            PhoneAuthProvider.verifyPhoneNumber(options)
+            awaitClose()
         } catch (exception : Exception) {
             Resource.Error(exception.localizedMessage?:"An Error Occurred in phoneNumberSignIn catch")
         }
