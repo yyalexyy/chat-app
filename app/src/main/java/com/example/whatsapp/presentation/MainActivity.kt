@@ -9,12 +9,13 @@ import androidx.core.view.isVisible
 import com.example.whatsapp.R
 import com.example.whatsapp.databinding.ActivityMainBinding
 import com.example.whatsapp.domain.model.User
+import com.example.whatsapp.presentation.HomePageLayout.HomePageFragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), IViews {
+class MainActivity : AppCompatActivity(), IViewsHandling {
 
     private lateinit var binding: ActivityMainBinding
     private val authenticationViewModel : AuthenticationViewModel by viewModels()
@@ -51,7 +52,30 @@ class MainActivity : AppCompatActivity(), IViews {
     }
 
     private fun checkAuthenticationStatus(): Boolean {
-        return false
+        return authenticationViewModel.isUserAuthenticated()
+    }
+
+    override fun showHomePage() {
+        openHomePage()
+    }
+
+    private fun openHomePage() {
+        setAllMainActivityViewsGone()
+        binding.fragmentContainer.visibility = View.VISIBLE
+        val homePageFragment = HomePageFragment()
+        supportFragmentManager.beginTransaction().add(R.id.fragmentContainer, homePageFragment, "homePageFragment").commit()
+    }
+
+    private fun setAllMainActivityViewsGone() {
+        binding.userAuthenticationLayout.visibility = View.GONE
+        binding.appLogo.visibility = View.GONE
+        binding.userNameLayout.visibility = View.GONE
+        binding.textInputLayout2.visibility = View.GONE
+        binding.etName.visibility = View.GONE
+        binding.btProceed.visibility = View.GONE
+        binding.userNumberLayout.visibility = View.GONE
+        binding.textInputLayout1.visibility = View.GONE
+        binding.etNumber.visibility = View.GONE
     }
 
     fun showBottomSheet() {
@@ -91,7 +115,7 @@ class MainActivity : AppCompatActivity(), IViews {
         binding.etName.visibility = View.VISIBLE
     }
 
-    override fun openHomePageLayout() {
-        Toast.makeText(this.applicationContext, "Home Page Layout", Toast.LENGTH_LONG).show()
-    }
+//    override fun openHomePageLayout() {
+//        Toast.makeText(this.applicationContext, "Home Page Layout", Toast.LENGTH_LONG).show()
+//    }
 }

@@ -15,7 +15,7 @@ class AuthenticationViewModel @Inject constructor(
     private val authUseCase : AuthenticationUseCase
 ) : ViewModel() {
 
-    lateinit var iViews: IViews
+    lateinit var iViews: IViewsHandling
 
     fun signInWithPhoneNumber(phoneNumber: String, activity: MainActivity) {
         iViews = activity
@@ -54,10 +54,12 @@ class AuthenticationViewModel @Inject constructor(
 
                     is Resource.Success -> {
                         iViews.hideProgressBar()
-                        iViews.openHomePageLayout()
+                        iViews.showHomePage()
                     }
                 }
             }
         }
     }
+
+    fun isUserAuthenticated() = authUseCase.isUserAuthenticated()
 }

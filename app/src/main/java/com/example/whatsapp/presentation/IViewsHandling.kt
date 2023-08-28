@@ -1,6 +1,6 @@
 package com.example.whatsapp.presentation
 
-interface IViews {
+interface IViewsHandling {
 
     fun showProgressBar() {}
 
@@ -12,5 +12,5 @@ interface IViews {
 
     fun changeViewsVisibility() {}
 
-    fun openHomePageLayout() {}
+    fun showHomePage() {}
 }
